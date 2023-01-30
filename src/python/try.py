@@ -70,7 +70,7 @@ class MyCanvas(Canvas):
                     float ambient = 0.7;
                     
                     // diffuse
-                    float kd = 10.0;
+                    float kd = 5.0;
                     vec3 norm = normalize(frag_normal);
                     vec3 light_dir = normalize(light_position - frag_position);
                     float distance = length(light_position - frag_position);
@@ -86,12 +86,7 @@ class MyCanvas(Canvas):
                     float energy_specular = pow( max(dot(norm, h), 0.0), p);
                     float specular = ks * energy_arrive * energy_specular;
 
-                    vec4 param = 
-                        max(vec4(1.0, 1.0, 1.0, 1.0), (ambient + diffuse + specular) * light_color);
-                    param = min(vec4(1.0, 1.0, 1.0, 1.0), param);
-                    color = param * frag_color;
-                    //color = (max(1, ))frag_color;
-                    //color =  (ambient + diffuse + specular) * light_color * frag_color;
+                    color =  (ambient + diffuse + specular) * light_color * frag_color;
                 }
                 """
 
@@ -105,17 +100,17 @@ class MyCanvas(Canvas):
 
             lines = read_file("./teapot2.obj")
             v_positions = lines_to_positions(lines)
-            print("vertexes:", v_positions[:10])
+            # print("vertexes:", v_positions)
             v_normals = lines_to_normals(lines)
-            print("normals:", v_normals[:10])
+            # print("normals:", v_normals)
             v_textures = lines_to_textures(lines)
             # print("textures:", v_textures)
             triangle_vs_inds, triangle_vts_inds, triangle_vns_inds = \
                 lines_to_triangles(lines)
-            print("triangle meshes:")
-            print("  vs:\t", triangle_vs_inds[:10])
-            print("  vts:\t", triangle_vts_inds)
-            print("  vns:\t", triangle_vns_inds[:10])
+            # print("triangle meshes:")
+            # print("  vs:\t", triangle_vs_inds)
+            # print("  vts:\t", triangle_vts_inds)
+            # print("  vns:\t", triangle_vns_inds)
 
             #trial2
             triangle_v_ind_plate = []
@@ -125,10 +120,9 @@ class MyCanvas(Canvas):
                 triangle_v_ind_plate[i] = int(triangle_v_ind_plate[i])
                 triangle_v_ind_plate[i] -= 1
             
+            self.mesh_num = len(triangle_v_ind_plate)
             indices = np.array(triangle_v_ind_plate, dtype=np.uint32)
-
             positions = np.array(v_positions, dtype=np.float32)
-            
             normals = np.array(v_normals, dtype=np.float32)
 
 
@@ -236,7 +230,7 @@ class MyCanvas(Canvas):
         self.shader.set_buffer("projection_mat", proj.T)
         with self.shader:
             self.shader.draw_array(Shader.PrimitiveType.Triangle,
-                                   0, 36, indexed=True)
+                                   0, self.mesh_num * 3, indexed=True)
 
 
 class TestApp(Screen):
